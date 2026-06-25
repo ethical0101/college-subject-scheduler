@@ -7,18 +7,21 @@ Below is a detailed breakdown of the implemented features, verification steps, a
 
 ---
 
-## 1. Separation and Classification of Morning & Afternoon Sessions
-In the course catalog, sections are grouped and separated to give students an immediate visual cue of their daily schedule:
-* **Morning Sessions**: Denoted by a gold-tinted header card with a sun icon (`<div class="session-divider morning">`). Includes slots `A1` through `TG1` and lab slots `L1` to `L30`.
-* **Afternoon Sessions**: Denoted by a violet-tinted header card with a moon icon (`<div class="session-divider afternoon">`). Includes slots `A2` through `TDD2`, late evening slots `V3` to `V7`, and lab slots `L31` to `L60`.
+## 1. Side-by-Side Comparison of Morning & Afternoon Sessions
+In the course catalog, sections are classified and displayed side-by-side in two symmetric columns within each subject card:
+* **Morning Column**: Highlighted with a gold header containing a sun icon. Displays slots `A1` through `TG1` and lab slots `L1` to `L30`.
+* **Afternoon Column**: Highlighted with a purple header containing a moon icon. Displays slots `A2` through `TDD2`, late evening slots `V3` to `V7`, and lab slots `L31` to `L60`.
+* **Symmetric Alignment**: If a course only has sections in one session, the opposite column renders a placeholder (e.g., "No morning sessions"), keeping the columns perfectly balanced.
+* **Compact Hover Tooltips**: Since the columns are narrow, option rows include tooltips (visible on hover) displaying the full faculty name and slot code to prevent readability issues.
+* **Paired Component Badges**: If a course has a paired component (e.g., theory has a lab), a green `Pair: {code}` link badge is displayed in the header next to the course credits.
 
 ---
 
-## 2. Automatic Lab-Theory Pairing (Opposite Sessions, Same Faculty)
-To simplify registration for courses that have both a lecture and a lab component (e.g., UI/UX Design `ISWE407L` / `ISWE407P` and Machine Learning `ISWE410L` / `ISWE410P`), the application features an automatic pairing engine:
-* **Automatic Registration**: Selecting a theory section automatically finds and registers the lab section for the **same faculty member in the opposite session** (and vice versa).
-  * *Example*: Selecting `ISWE407L` (UI/UX Theory) taught by `JEEVITHA P` in the **Morning** (`A1+TA1`) automatically adds `ISWE407P` (UI/UX Lab) taught by `JEEVITHA P` in the **Afternoon** (`L55+L56`).
-* **Clean Synchronization**: Removing the theory course automatically removes the paired lab course, and removing the lab course automatically removes the theory course, maintaining data consistency.
+## 2. Flexible Lab-Theory Pairing & Override Switch
+For courses with paired lecture and lab components (e.g., UI/UX Design `ISWE407L` / `ISWE407P` and Machine Learning `ISWE410L` / `ISWE410P`), the application offers a flexible pairing engine:
+* **Auto-Pairing Switch**: A premium toggle switch, **Auto-Pair Theory & Lab**, is added to the catalog controls sidebar.
+* **Automatic Pairing (Enabled)**: Selecting a theory section automatically registers the corresponding lab section for the **same faculty member in the opposite session** (and vice versa). Removing one automatically removes the other.
+* **Manual Override (Disabled)**: Unchecking the switch disables automatic registration. This allows students to manually select and mix slots (e.g., choose a morning theory slot and a different afternoon lab slot, or select different faculties) giving them absolute scheduling freedom.
 
 ---
 
