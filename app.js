@@ -1100,6 +1100,33 @@ function exportTimetable() {
   window.print(); // Polished print style is optimized to download/save as PDF cleanly!
 }
 
+function downloadTimetableImage() {
+  const element = document.querySelector(".timetable-wrapper");
+  if (!element) return;
+  
+  showNotification("Generating image, please wait...", "info");
+  
+  // Clear any hover highlights before capturing
+  clearHighlights();
+  
+  // Use html2canvas to render the timetable wrapper as a PNG image
+  html2canvas(element, {
+    scale: 2, // Double resolution for high quality
+    useCORS: true,
+    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim() || '#0f172a',
+    logging: false
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "college_timetable.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    showNotification("Timetable image downloaded!", "success");
+  }).catch(err => {
+    console.error("Image download failed:", err);
+    showNotification("Failed to download image.", "error");
+  });
+}
+
 // Render Master
 function renderAll() {
   renderCourseCatalog();
@@ -1158,6 +1185,12 @@ document.addEventListener("DOMContentLoaded", () => {
   const exportBtn = document.getElementById("export-timetable-btn");
   if (exportBtn) {
     exportBtn.addEventListener("click", exportTimetable);
+  }
+
+  // Download Image button listener
+  const downloadImageBtn = document.getElementById("download-image-btn");
+  if (downloadImageBtn) {
+    downloadImageBtn.addEventListener("click", downloadTimetableImage);
   }
 
   // Initial render

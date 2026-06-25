@@ -239,6 +239,16 @@ input, button {
   border-color: var(--danger);
 }
 
+.btn-success {
+  background-color: var(--success);
+  color: #ffffff;
+}
+
+.btn-success:hover {
+  background-color: #059669; /* Emerald 600 */
+  transform: translateY(-1px);
+}
+
 /* 4. Dashboard Layout */
 .dashboard-layout {
   max-width: 1600px;
