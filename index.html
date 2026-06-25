@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Subject Scheduler & Timetable Builder</title>
+  <meta name="description" content="An interactive web application to browse college courses, view slot structures, and construct clash-free timetables.">
+  
+  <!-- Modern Typography from Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <div class="logo-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="logo-text">
+          <h1>College Subject Scheduler</h1>
+          <p>Fall Semester 2026-27 | Class Slot Matrix Planner</p>
+        </div>
+      </div>
+      
+      <div class="actions-area">
+        <!-- Credit Counter -->
+        <div class="credits-counter" id="credits-badge-container">
+          <span class="credits-label">Registered Credits:</span>
+          <span class="credits-value" id="total-credits-count">0</span>
+        </div>
+        
+        <!-- Utility Controls -->
+        <div class="control-buttons">
+          <button id="theme-toggle-btn" class="btn btn-secondary" title="Toggle Light/Dark Theme">
+            <i class="fas fa-sun"></i>
+            <span>Light Mode</span>
+          </button>
+          <button id="clear-timetable-btn" class="btn btn-danger" title="Clear Timetable">
+            <i class="fas fa-trash-alt"></i>
+            <span>Clear</span>
+          </button>
+          <button id="export-timetable-btn" class="btn btn-primary" title="Print/Export Timetable">
+            <i class="fas fa-download"></i>
+            <span>Print / PDF</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Layout -->
+  <main class="dashboard-layout">
+    
+    <!-- Left Column: Scheduler & Timetable -->
+    <section class="scheduler-section">
+      <div class="card grid-card">
+        <div class="card-header">
+          <h2><i class="fas fa-border-all"></i> Weekly Timetable Grid</h2>
+          <span class="card-subtitle">Click course buttons in the catalog to populate slots, or click any slot to filter options</span>
+        </div>
+        
+        <!-- Interactive Timetable Grid -->
+        <div class="timetable-wrapper">
+          <table class="timetable-grid" id="main-timetable-grid">
+            <thead>
+              <tr>
+                <th class="corner-header">Days / Hours</th>
+                
+                <!-- Timing Columns based exactly on the provided slot matrix -->
+                <th>
+                  <div class="time-header-title">8:00 - 8:50 AM</div>
+                  <div class="time-header-sub">L1/L7/L13/L19/L25</div>
+                </th>
+                <th>
+                  <div class="time-header-title">9:00 - 9:50 AM</div>
+                  <div class="time-header-sub">L2/L8/L14/L20/L26</div>
+                </th>
+                <th>
+                  <div class="time-header-title">10:00 - 10:50 AM</div>
+                  <div class="time-header-sub">L3/L9/L15/L21/L27</div>
+                </th>
+                <th>
+                  <div class="time-header-title">11:00 - 11:50 AM</div>
+                  <div class="time-header-sub">L4/L10/L16/L22/L28</div>
+                </th>
+                <th>
+                  <div class="time-header-title">12:00 - 12:50 PM</div>
+                  <div class="time-header-sub">L5/L11/L17/L23/L29</div>
+                </th>
+                <th class="lab-only-column">
+                  <div class="time-header-title" style="color: var(--text-muted);">Lab Only</div>
+                  <div class="time-header-sub">L6/L12/L18/L24/L30</div>
+                </th>
+                
+                <!-- Lunch Break Column -->
+                <th class="lunch-column">
+                  <div class="lunch-header-title">LUNCH</div>
+                  <div class="lunch-header-sub">12:50 - 2:00 PM</div>
+                </th>
+                
+                <th>
+                  <div class="time-header-title">2:00 - 2:50 PM</div>
+                  <div class="time-header-sub">L31/L37/L43/L49/L55</div>
+                </th>
+                <th>
+                  <div class="time-header-title">3:00 - 3:50 PM</div>
+                  <div class="time-header-sub">L32/L38/L44/L50/L56</div>
+                </th>
+                <th>
+                  <div class="time-header-title">4:00 - 4:50 PM</div>
+                  <div class="time-header-sub">L33/L39/L45/L51/L57</div>
+                </th>
+                <th>
+                  <div class="time-header-title">5:00 - 5:50 PM</div>
+                  <div class="time-header-sub">L34/L40/L46/L52/L58</div>
+                </th>
+                <th>
+                  <div class="time-header-title">6:00 - 6:50 PM</div>
+                  <div class="time-header-sub">L35/L41/L47/L53/L59</div>
+                </th>
+                <th class="lab-only-column">
+                  <div class="time-header-title" style="color: var(--text-muted);">Lab Only</div>
+                  <div class="time-header-sub">L36/L42/L48/L54/L60</div>
+                </th>
+                <th class="theory-only-column">
+                  <div class="time-header-title" style="color: var(--primary);">7:01 - 7:50 PM</div>
+                  <div class="time-header-sub">V3/V4/V5/V6/V7</div>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="timetable-grid-body">
+              <!-- Monday Row -->
+              <tr id="row-mon">
+                <td class="day-header">MON</td>
+                <td data-day="0" data-col="0" title="Click to filter by slot A1/L1"></td>
+                <td data-day="0" data-col="1" title="Click to filter by slot F1/L2"></td>
+                <td data-day="0" data-col="2" title="Click to filter by slot D1/L3"></td>
+                <td data-day="0" data-col="3" title="Click to filter by slot TB1/L4"></td>
+                <td data-day="0" data-col="4" title="Click to filter by slot TG1/L5"></td>
+                <td data-day="0" data-col="5" title="Click to filter by slot L6"></td>
+                <td class="lunch-cell"><div class="lunch-text">LUNCH</div></td>
+                <td data-day="0" data-col="6" title="Click to filter by slot A2/L31"></td>
+                <td data-day="0" data-col="7" title="Click to filter by slot F2/L32"></td>
+                <td data-day="0" data-col="8" title="Click to filter by slot D2/L33"></td>
+                <td data-day="0" data-col="9" title="Click to filter by slot TB2/L34"></td>
+                <td data-day="0" data-col="10" title="Click to filter by slot TG2/L35"></td>
+                <td data-day="0" data-col="11" title="Click to filter by slot L36"></td>
+                <td data-day="0" data-col="12" title="Click to filter by slot V3"></td>
+              </tr>
+              <!-- Tuesday Row -->
+              <tr id="row-tue">
+                <td class="day-header">TUE</td>
+                <td data-day="1" data-col="0" title="Click to filter by slot B1/L7"></td>
+                <td data-day="1" data-col="1" title="Click to filter by slot G1/L8"></td>
+                <td data-day="1" data-col="2" title="Click to filter by slot E1/L9"></td>
+                <td data-day="1" data-col="3" title="Click to filter by slot TC1/L10"></td>
+                <td data-day="1" data-col="4" title="Click to filter by slot TAA1/L11"></td>
+                <td data-day="1" data-col="5" title="Click to filter by slot L12"></td>
+                <td class="lunch-cell"><div class="lunch-text">LUNCH</div></td>
+                <td data-day="1" data-col="6" title="Click to filter by slot B2/L37"></td>
+                <td data-day="1" data-col="7" title="Click to filter by slot G2/L38"></td>
+                <td data-day="1" data-col="8" title="Click to filter by slot E2/L39"></td>
+                <td data-day="1" data-col="9" title="Click to filter by slot TC2/L40"></td>
+                <td data-day="1" data-col="10" title="Click to filter by slot TAA2/L41"></td>
+                <td data-day="1" data-col="11" title="Click to filter by slot L42"></td>
+                <td data-day="1" data-col="12" title="Click to filter by slot V4"></td>
+              </tr>
+              <!-- Wednesday Row -->
+              <tr id="row-wed">
+                <td class="day-header">WED</td>
+                <td data-day="2" data-col="0" title="Click to filter by slot C1/L13"></td>
+                <td data-day="2" data-col="1" title="Click to filter by slot A1/L14"></td>
+                <td data-day="2" data-col="2" title="Click to filter by slot F1/L15"></td>
+                <td data-day="2" data-col="3" title="Click to filter by slot V1/L16"></td>
+                <td data-day="2" data-col="4" title="Click to filter by slot V2/L17"></td>
+                <td data-day="2" data-col="5" title="Click to filter by slot L18"></td>
+                <td class="lunch-cell"><div class="lunch-text">LUNCH</div></td>
+                <td data-day="2" data-col="6" title="Click to filter by slot C2/L43"></td>
+                <td data-day="2" data-col="7" title="Click to filter by slot A2/L44"></td>
+                <td data-day="2" data-col="8" title="Click to filter by slot F2/L45"></td>
+                <td data-day="2" data-col="9" title="Click to filter by slot TD2/L46"></td>
+                <td data-day="2" data-col="10" title="Click to filter by slot TBB2/L47"></td>
+                <td data-day="2" data-col="11" title="Click to filter by slot L48"></td>
+                <td data-day="2" data-col="12" title="Click to filter by slot V5"></td>
+              </tr>
+              <!-- Thursday Row -->
+              <tr id="row-thu">
+                <td class="day-header">THU</td>
+                <td data-day="3" data-col="0" title="Click to filter by slot D1/L19"></td>
+                <td data-day="3" data-col="1" title="Click to filter by slot B1/L20"></td>
+                <td data-day="3" data-col="2" title="Click to filter by slot G1/L21"></td>
+                <td data-day="3" data-col="3" title="Click to filter by slot TE1/L22"></td>
+                <td data-day="3" data-col="4" title="Click to filter by slot TCC1/L23"></td>
+                <td data-day="3" data-col="5" title="Click to filter by slot L24"></td>
+                <td class="lunch-cell"><div class="lunch-text">LUNCH</div></td>
+                <td data-day="3" data-col="6" title="Click to filter by slot D2/L49"></td>
+                <td data-day="3" data-col="7" title="Click to filter by slot B2/L50"></td>
+                <td data-day="3" data-col="8" title="Click to filter by slot G2/L51"></td>
+                <td data-day="3" data-col="9" title="Click to filter by slot TE2/L52"></td>
+                <td data-day="3" data-col="10" title="Click to filter by slot TCC2/L53"></td>
+                <td data-day="3" data-col="11" title="Click to filter by slot L54"></td>
+                <td data-day="3" data-col="12" title="Click to filter by slot V6"></td>
+              </tr>
+              <!-- Friday Row -->
+              <tr id="row-fri">
+                <td class="day-header">FRI</td>
+                <td data-day="4" data-col="0" title="Click to filter by slot E1/L25"></td>
+                <td data-day="4" data-col="1" title="Click to filter by slot C1/L26"></td>
+                <td data-day="4" data-col="2" title="Click to filter by slot TA1/L27"></td>
+                <td data-day="4" data-col="3" title="Click to filter by slot TF1/L28"></td>
+                <td data-day="4" data-col="4" title="Click to filter by slot TD1/L29"></td>
+                <td data-day="4" data-col="5" title="Click to filter by slot L30"></td>
+                <td class="lunch-cell"><div class="lunch-text">LUNCH</div></td>
+                <td data-day="4" data-col="6" title="Click to filter by slot E2/L55"></td>
+                <td data-day="4" data-col="7" title="Click to filter by slot C2/L56"></td>
+                <td data-day="4" data-col="8" title="Click to filter by slot TA2/L57"></td>
+                <td data-day="4" data-col="9" title="Click to filter by slot TF2/L58"></td>
+                <td data-day="4" data-col="10" title="Click to filter by slot TDD2/L59"></td>
+                <td data-day="4" data-col="11" title="Click to filter by slot L60"></td>
+                <td data-day="4" data-col="12" title="Click to filter by slot V7"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Selected Courses Summary Card -->
+      <div class="card summary-card" id="printable-summary-card">
+        <div class="card-header">
+          <h2><i class="fas fa-list-check"></i> Registered Subjects Summary</h2>
+          <span class="card-subtitle">Detailed overview of selected faculties and slots</span>
+        </div>
+        <div class="summary-content" id="selected-courses-list">
+          <!-- Populated dynamically by app.js -->
+          <div class="empty-summary">
+            <p>No subjects added yet. Select courses from the list to start building your timetable.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Right Column: Subject Catalog & Filters -->
+    <section class="catalog-section">
+      <div class="card catalog-card">
+        
+        <!-- Filter Controls -->
+        <div class="catalog-controls">
+          <div class="search-box">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="subject-search" placeholder="Search by subject code, name, faculty, or slot..." aria-label="Search subjects">
+          </div>
+          
+          <div class="category-filters">
+            <button class="filter-btn active" data-category="All">All</button>
+            <button class="filter-btn" data-category="DC - Discipline Core">Discipline Core (DC)</button>
+            <button class="filter-btn" data-category="DE - Discipline Elective">Discipline Elective (DE)</button>
+            <button class="filter-btn" data-category="OE - Open Elective">Open Elective (OE)</button>
+            <button class="filter-btn" data-category="Slot Directory"><i class="fas fa-folder-open"></i> Slot Directory</button>
+          </div>
+        </div>
+
+        <!-- Slot Filter Status Banner -->
+        <div id="slot-filter-banner" class="slot-filter-banner" style="display: none;">
+          <span><i class="fas fa-filter"></i> Filtering by slot: <strong id="slot-filter-label"></strong></span>
+          <button id="clear-slot-filter-btn" class="btn-clear-filter" title="Clear slot filter">&times; Clear</button>
+        </div>
+        
+        <!-- Catalog Subject Cards -->
+        <div class="course-catalog-wrapper" id="course-catalog">
+          <!-- Populated dynamically by app.js -->
+        </div>
+        
+      </div>
+    </section>
+  </main>
+
+  <!-- Notification Popup Container -->
+  <div class="notifications-container" id="notifications-container"></div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <p>© 2026 College Subject Timetable Planner. All rights reserved.</p>
+      <p class="footer-note">Designed to simplify subject scheduling and prevent registration slot clashes.</p>
+    </div>
+  </footer>
+
+  <!-- Script Import -->
+  <script src="app.js"></script>
+</body>
+</html>
