@@ -597,17 +597,23 @@ function renderCourseCatalog() {
     card.className = "course-card";
     card.style.borderLeftColor = getCourseColor(course.code);
 
-    // Group options by Morning and Afternoon with search filtering
+    // Filter options based on search query
     const q = searchQuery ? searchQuery.toLowerCase() : "";
     const isCourseMatch = q ? (course.code.toLowerCase().includes(q) || course.name.toLowerCase().includes(q)) : false;
     
-    let morningOpts = course.options.filter(opt => isMorningSlot(opt.slot));
-    let afternoonOpts = course.options.filter(opt => !isMorningSlot(opt.slot));
-    
+    let opts = course.options;
     if (q && !isCourseMatch) {
-      morningOpts = morningOpts.filter(opt => opt.faculty.toLowerCase().includes(q) || opt.slot.toLowerCase().includes(q));
-      afternoonOpts = afternoonOpts.filter(opt => opt.faculty.toLowerCase().includes(q) || opt.slot.toLowerCase().includes(q));
+      opts = opts.filter(opt => opt.faculty.toLowerCase().includes(q) || opt.slot.toLowerCase().includes(q));
     }
+
+    // Sort options: Morning first, then Afternoon
+    opts = [...opts].sort((a, b) => {
+      const aMorning = isMorningSlot(a.slot);
+      const bMorning = isMorningSlot(b.slot);
+      if (aMorning && !bMorning) return -1;
+      if (!aMorning && bMorning) return 1;
+      return a.slot.localeCompare(b.slot);
+    });
 
     // Partner course badge logic (e.g. theory paired with lab)
     const isTheory = course.code.endsWith("L");
@@ -625,34 +631,15 @@ function renderCourseCatalog() {
       `;
     }
 
-    let optionsHtml = `<div class="course-sessions-container">`;
-
-    // Morning sessions column
-    optionsHtml += `<div class="session-column morning">`;
-    optionsHtml += `<div class="session-divider morning"><i class="fas fa-sun"></i> Morning</div>`;
-    if (morningOpts.length > 0) {
-      morningOpts.forEach(opt => {
+    let optionsHtml = `<div class="course-options-list">`;
+    if (opts.length > 0) {
+      opts.forEach(opt => {
         const isAdded = selectedClasses.some(c => c.courseCode === course.code && c.slot === opt.slot && c.faculty === opt.faculty);
         optionsHtml += createOptionRow(course, opt, isAdded);
       });
     } else {
-      optionsHtml += `<div class="no-sessions-placeholder">No morning sessions</div>`;
+      optionsHtml += `<div class="no-sessions-placeholder">No matching options available</div>`;
     }
-    optionsHtml += `</div>`;
-
-    // Afternoon sessions column
-    optionsHtml += `<div class="session-column afternoon">`;
-    optionsHtml += `<div class="session-divider afternoon"><i class="fas fa-moon"></i> Afternoon</div>`;
-    if (afternoonOpts.length > 0) {
-      afternoonOpts.forEach(opt => {
-        const isAdded = selectedClasses.some(c => c.courseCode === course.code && c.slot === opt.slot && c.faculty === opt.faculty);
-        optionsHtml += createOptionRow(course, opt, isAdded);
-      });
-    } else {
-      optionsHtml += `<div class="no-sessions-placeholder">No afternoon sessions</div>`;
-    }
-    optionsHtml += `</div>`;
-
     optionsHtml += `</div>`;
 
     card.innerHTML = `
@@ -692,6 +679,7 @@ function renderCourseCatalog() {
 function createOptionRow(course, opt, isAdded) {
   const clash = checkSlotClash(course.code, opt.slot, opt.faculty);
   const coOccur = getCoOccurringCourses(opt.slot, course.code);
+  const isMorning = isMorningSlot(opt.slot);
   
   let coOccurHtml = "";
   if (coOccur.length > 0) {
@@ -703,6 +691,10 @@ function createOptionRow(course, opt, isAdded) {
     clashHtml = `<div class="clash-warning-text"><i class="fas fa-exclamation-triangle"></i> ${clash.reason}</div>`;
   }
 
+  const sessionBadge = isMorning 
+    ? `<span class="session-badge morning"><i class="fas fa-sun"></i> Morning</span>`
+    : `<span class="session-badge afternoon"><i class="fas fa-moon"></i> Afternoon</span>`;
+
   return `
     <div class="option-row-wrapper">
       <div class="option-row ${isAdded ? 'added' : ''} ${clash.clashed && !isAdded ? 'clashed' : ''}" 
@@ -711,22 +703,25 @@ function createOptionRow(course, opt, isAdded) {
            data-faculty="${opt.faculty}" 
            data-type="${opt.type}"
            title="Faculty: ${opt.faculty}\nSlot: ${opt.slot}">
-        <div class="option-details">
-          <span class="option-slot">${opt.slot}</span>
-          <span class="option-faculty">${opt.faculty}</span>
+        <div class="option-left-content">
+          ${sessionBadge}
+          <span class="option-slot-badge">${opt.slot}</span>
+          <span class="option-faculty-name">${opt.faculty}</span>
         </div>
-        ${isAdded 
-          ? `<button class="btn-remove-slot" onclick="removeClass('${course.code}', '${opt.slot}')">
-               <i class="fas fa-minus-circle"></i> Remove
-             </button>`
-          : clash.clashed
-            ? `<button class="btn-add-slot disabled" disabled title="${clash.reason}">
-                 <i class="fas fa-ban"></i> Blocked
+        <div class="option-right-content">
+          ${isAdded 
+            ? `<button class="btn-remove-slot btn-xs" onclick="removeClass('${course.code}', '${opt.slot}')">
+                 <i class="fas fa-minus-circle"></i> Remove
                </button>`
-            : `<button class="btn-add-slot" onclick="addClass('${course.code}', '${opt.slot}', '${opt.faculty}', '${opt.type}')">
-                 <i class="fas fa-plus-circle"></i> Add
-               </button>`
-        }
+            : clash.clashed
+              ? `<button class="btn-add-slot btn-xs disabled" disabled title="${clash.reason}">
+                   <i class="fas fa-ban"></i> Blocked
+                 </button>`
+              : `<button class="btn-add-slot btn-xs" onclick="addClass('${course.code}', '${opt.slot}', '${opt.faculty}', '${opt.type}')">
+                   <i class="fas fa-plus-circle"></i> Add
+                 </button>`
+          }
+        </div>
       </div>
       ${clashHtml}
       ${coOccurHtml}
