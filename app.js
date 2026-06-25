@@ -1101,52 +1101,31 @@ function exportTimetable() {
 }
 
 function downloadTimetableImage() {
-  const element = document.querySelector(".timetable-wrapper");
-  if (!element) return;
+  const element = document.getElementById("main-timetable-grid");
+  const wrapper = document.querySelector(".timetable-wrapper");
+  if (!element || !wrapper) return;
   
   showNotification("Generating high-resolution image, please wait...", "info");
   
   // Clear any hover highlights before capturing
   clearHighlights();
   
-  // Save original scroll position and overflow style
-  const originalOverflow = element.style.overflow;
-  const originalScrollLeft = element.scrollLeft;
+  // Get the background color of the wrapper to ensure a solid background
+  const bgColor = getComputedStyle(wrapper).backgroundColor || '#0f172a';
   
-  // Temporarily force the wrapper to display its entire width for capture
-  element.style.overflow = "visible";
-  element.scrollLeft = 0;
-  
-  const scrollWidth = element.scrollWidth;
-  const scrollHeight = element.scrollHeight;
-  
-  // Use html2canvas to render the complete timetable wrapper as a high-res PNG image
+  // Use html2canvas to render the table directly
   html2canvas(element, {
     scale: 3, // Triple resolution scale factor for super crisp text and lines
     useCORS: true,
-    width: scrollWidth,
-    height: scrollHeight,
-    windowWidth: scrollWidth + 40,
-    windowHeight: scrollHeight + 40,
-    scrollX: 0,
-    scrollY: -window.scrollY, // Avoid vertical offset issues
-    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg-primary').trim() || '#0f172a',
+    backgroundColor: bgColor,
     logging: false
   }).then(canvas => {
-    // Restore original styles and scroll state
-    element.style.overflow = originalOverflow;
-    element.scrollLeft = originalScrollLeft;
-    
     const link = document.createElement("a");
     link.download = "college_timetable_highres.png";
     link.href = canvas.toDataURL("image/png");
     link.click();
     showNotification("High-resolution timetable image downloaded!", "success");
   }).catch(err => {
-    // Restore original styles and scroll state in case of error
-    element.style.overflow = originalOverflow;
-    element.scrollLeft = originalScrollLeft;
-    
     console.error("Image download failed:", err);
     showNotification("Failed to download image.", "error");
   });
