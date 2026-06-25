@@ -440,7 +440,11 @@ function addClass(courseCode, slot, faculty, type, skipPairing = false) {
 
   // Automatic pairing logic for opposite session of the same faculty
   if (!skipPairing) {
-    handleAutomaticPairing(courseCode, slot, faculty, true);
+    const autoPairToggle = document.getElementById("auto-pair-toggle");
+    const isAutoPairEnabled = autoPairToggle ? autoPairToggle.checked : true;
+    if (isAutoPairEnabled) {
+      handleAutomaticPairing(courseCode, slot, faculty, true);
+    }
   }
   return true;
 }
@@ -456,7 +460,11 @@ function removeClass(courseCode, slot, skipPairing = false) {
 
     // Automatic pairing removal
     if (!skipPairing) {
-      handleAutomaticPairing(courseCode, slot, removed.faculty, false);
+      const autoPairToggle = document.getElementById("auto-pair-toggle");
+      const isAutoPairEnabled = autoPairToggle ? autoPairToggle.checked : true;
+      if (isAutoPairEnabled) {
+        handleAutomaticPairing(courseCode, slot, removed.faculty, false);
+      }
     }
   }
 }
@@ -593,31 +601,60 @@ function renderCourseCatalog() {
     const morningOpts = course.options.filter(opt => isMorningSlot(opt.slot));
     const afternoonOpts = course.options.filter(opt => !isMorningSlot(opt.slot));
 
-    let optionsHtml = "";
+    // Partner course badge logic (e.g. theory paired with lab)
+    const isTheory = course.code.endsWith("L");
+    const isLab = course.code.endsWith("P");
+    const baseCode = course.code.slice(0, -1);
+    const partnerCode = baseCode + (isTheory ? "P" : "L");
+    const hasPartner = COURSES.some(c => c.code === partnerCode);
+    
+    let partnerBadgeHtml = "";
+    if (hasPartner) {
+      partnerBadgeHtml = `
+        <span class="partner-course-badge" title="This course has a paired ${isTheory ? 'Lab' : 'Theory'} component">
+          <i class="fas fa-link"></i> Pair: ${partnerCode}
+        </span>
+      `;
+    }
 
+    let optionsHtml = `<div class="course-sessions-container">`;
+
+    // Morning sessions column
+    optionsHtml += `<div class="session-column morning">`;
+    optionsHtml += `<div class="session-divider morning"><i class="fas fa-sun"></i> Morning</div>`;
     if (morningOpts.length > 0) {
-      optionsHtml += `<div class="session-divider morning"><i class="fas fa-sun"></i> Morning Sessions</div>`;
       morningOpts.forEach(opt => {
         const isAdded = selectedClasses.some(c => c.courseCode === course.code && c.slot === opt.slot && c.faculty === opt.faculty);
         optionsHtml += createOptionRow(course, opt, isAdded);
       });
+    } else {
+      optionsHtml += `<div class="no-sessions-placeholder">No morning sessions</div>`;
     }
+    optionsHtml += `</div>`;
 
+    // Afternoon sessions column
+    optionsHtml += `<div class="session-column afternoon">`;
+    optionsHtml += `<div class="session-divider afternoon"><i class="fas fa-moon"></i> Afternoon</div>`;
     if (afternoonOpts.length > 0) {
-      optionsHtml += `<div class="session-divider afternoon"><i class="fas fa-moon"></i> Afternoon Sessions</div>`;
       afternoonOpts.forEach(opt => {
         const isAdded = selectedClasses.some(c => c.courseCode === course.code && c.slot === opt.slot && c.faculty === opt.faculty);
         optionsHtml += createOptionRow(course, opt, isAdded);
       });
+    } else {
+      optionsHtml += `<div class="no-sessions-placeholder">No afternoon sessions</div>`;
     }
+    optionsHtml += `</div>`;
+
+    optionsHtml += `</div>`;
 
     card.innerHTML = `
       <div class="course-header">
-        <div>
+        <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem;">
           <span class="course-code-badge" style="background: ${getCourseColor(course.code)}20; color: ${getCourseColor(course.code)}">
             ${course.code}
           </span>
           <span class="course-credits-badge">${course.credits} Credits</span>
+          ${partnerBadgeHtml}
         </div>
         <div class="course-category-tag">${course.category}</div>
       </div>
@@ -664,7 +701,8 @@ function createOptionRow(course, opt, isAdded) {
            data-code="${course.code}" 
            data-slot="${opt.slot}" 
            data-faculty="${opt.faculty}" 
-           data-type="${opt.type}">
+           data-type="${opt.type}"
+           title="Faculty: ${opt.faculty}\nSlot: ${opt.slot}">
         <div class="option-details">
           <span class="option-slot">${opt.slot}</span>
           <span class="option-faculty">${opt.faculty}</span>
@@ -1081,6 +1119,15 @@ document.addEventListener("DOMContentLoaded", () => {
   const clearFilterBtn = document.getElementById("clear-slot-filter-btn");
   if (clearFilterBtn) {
     clearFilterBtn.addEventListener("click", clearSlotFilter);
+  }
+
+  // Auto-pair toggle listener
+  const autoPairToggle = document.getElementById("auto-pair-toggle");
+  if (autoPairToggle) {
+    autoPairToggle.addEventListener("change", () => {
+      renderCourseCatalog();
+      showNotification(`Auto-pairing is now ${autoPairToggle.checked ? 'enabled' : 'disabled'}`, "info");
+    });
   }
 
   // Theme Management
