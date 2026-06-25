@@ -113,7 +113,8 @@ input, button {
 }
 
 .header-container {
-  max-width: 1600px;
+  max-width: 98%; /* Fill the screen */
+  width: 100%;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -251,13 +252,13 @@ input, button {
 
 /* 4. Dashboard Layout */
 .dashboard-layout {
-  max-width: 1600px;
+  max-width: 98%; /* Fill the screen */
   width: 100%;
-  margin: 1.5rem auto;
-  padding: 0 1.5rem;
+  margin: 1rem auto;
+  padding: 0 1rem;
   display: grid;
-  grid-template-columns: 1fr 460px; /* Expanded to 460px to accommodate side-by-side columns cleanly */
-  gap: 1.5rem;
+  grid-template-columns: 1fr 520px; /* Expanded to 520px to fit side-by-side options perfectly */
+  gap: 1.25rem;
   flex: 1;
 }
 
@@ -321,16 +322,16 @@ input, button {
 .timetable-grid {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.8rem;
+  font-size: 0.78rem; /* Slightly more compact font */
   text-align: center;
   table-layout: fixed;
-  min-width: 1200px;
+  min-width: 950px; /* Reduced to fit standard laptop resolutions without scrollbars */
 }
 
 .timetable-grid th, .timetable-grid td {
   border: 1px solid var(--border-color);
-  padding: 0.6rem 0.4rem;
-  height: 4.8rem;
+  padding: 0.4rem 0.3rem; /* More compact padding */
+  height: 4.2rem; /* Reduced height to fit on screen vertically */
   vertical-align: middle;
   transition: var(--transition);
   position: relative;
@@ -452,7 +453,7 @@ input, button {
   height: 100%;
   display: flex;
   flex-direction: column;
-  max-height: 800px;
+  max-height: 82vh; /* Dynamically fits the screen height on all devices */
 }
 
 .catalog-controls {
