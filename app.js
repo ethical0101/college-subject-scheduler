@@ -597,9 +597,17 @@ function renderCourseCatalog() {
     card.className = "course-card";
     card.style.borderLeftColor = getCourseColor(course.code);
 
-    // Group options by Morning and Afternoon
-    const morningOpts = course.options.filter(opt => isMorningSlot(opt.slot));
-    const afternoonOpts = course.options.filter(opt => !isMorningSlot(opt.slot));
+    // Group options by Morning and Afternoon with search filtering
+    const q = searchQuery ? searchQuery.toLowerCase() : "";
+    const isCourseMatch = q ? (course.code.toLowerCase().includes(q) || course.name.toLowerCase().includes(q)) : false;
+    
+    let morningOpts = course.options.filter(opt => isMorningSlot(opt.slot));
+    let afternoonOpts = course.options.filter(opt => !isMorningSlot(opt.slot));
+    
+    if (q && !isCourseMatch) {
+      morningOpts = morningOpts.filter(opt => opt.faculty.toLowerCase().includes(q) || opt.slot.toLowerCase().includes(q));
+      afternoonOpts = afternoonOpts.filter(opt => opt.faculty.toLowerCase().includes(q) || opt.slot.toLowerCase().includes(q));
+    }
 
     // Partner course badge logic (e.g. theory paired with lab)
     const isTheory = course.code.endsWith("L");
@@ -732,11 +740,23 @@ function renderSlotDirectory() {
   if (!container) return;
   container.innerHTML = "";
 
-  // Group all slot-wise options from all courses
+  // Group all slot-wise options from all courses with search filtering
   const slotData = {};
+  const q = searchQuery ? searchQuery.toLowerCase() : "";
   
   COURSES.forEach(course => {
     course.options.forEach(opt => {
+      // If there is a search query, filter slot entries
+      if (q) {
+        const matchesCode = course.code.toLowerCase().includes(q);
+        const matchesName = course.name.toLowerCase().includes(q);
+        const matchesFaculty = opt.faculty.toLowerCase().includes(q);
+        const matchesSlot = opt.slot.toLowerCase().includes(q);
+        if (!matchesCode && !matchesName && !matchesFaculty && !matchesSlot) {
+          return; // Skip this option if it doesn't match search query
+        }
+      }
+
       const parts = opt.slot.split("+");
       const baseSlot = parts[0].trim(); // e.g. "B1" or "L37"
       
@@ -766,6 +786,17 @@ function renderSlotDirectory() {
     if (!aMorning && bMorning) return 1;
     return a.localeCompare(b);
   });
+
+  if (sortedSlots.length === 0) {
+    const noSlots = document.createElement("div");
+    noSlots.className = "no-results";
+    noSlots.innerHTML = `
+      <i class="fas fa-search"></i>
+      <p>No slots or courses match your search query in the directory.</p>
+    `;
+    container.appendChild(noSlots);
+    return;
+  }
 
   const dirTitle = document.createElement("div");
   dirTitle.className = "directory-title";
